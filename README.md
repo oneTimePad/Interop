@@ -4,7 +4,10 @@ Members( Adam, Bobby, Jun, Matt)
 
 #Client side Autonomous Drone Interoperability code
 
-Server-side code is at https://github.com/auvsi-suas/interop 
+Server-side code is at https://github.com/auvsi-suas/interop:
+  
+  - Pleae clone to seperate directory, never push that here
+
 
 Task 1:
   
