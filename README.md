@@ -9,6 +9,9 @@ Server-side code is at https://github.com/auvsi-suas/interop:
   - Please clone to seperate directory, never push that here
 
 
+API LINK (OF VITAL IMPORTANCE) :http://auvsi-suas-competition-interoperability-system.readthedocs.org/en/latest/spec.html
+	- LOOK OVER LOGIN AND TELEM ENDPOINTS
+
 Task 1:
   
     -Send telemetry data via Mission planner to interoperability network at 10Hz
