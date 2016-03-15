@@ -25,7 +25,7 @@ class Client(object):
     AsyncClient uses this base Client to add performance features.
     """
 
-    def __init__(self, url, username, password, timeout=1):
+    def __init__(self, url, username, password, timeout=5):
         """Create a new Client and login.
 
         Args:
@@ -239,7 +239,7 @@ class AsyncClient(object):
     Future response or error is received prior to making another request.
     """
 
-    def __init__(self, url, username, password, timeout=1, workers=8):
+    def __init__(self, url, username, password, timeout=5, workers=8):
         """Create a new AsyncClient and login.
 
         Args:
