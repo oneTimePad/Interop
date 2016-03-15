@@ -1,7 +1,7 @@
 # Interop
 our interop code, not theirs
 
-[Interop Docs](auvsi-suas-competition-interoperability-system.readthedocs.org/en/latest/integration/hints.html)
+[Interop Docs](https://auvsi-suas-competition-interoperability-system.readthedocs.org/en/latest/integration/hints.html)
 
 ###Client Program checklist:
 
