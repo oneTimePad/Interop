@@ -12,6 +12,7 @@ our interop code, not theirs
 - [X] catches server failures
 
 - [ ] re-logins if necessary
+- No cookie found, tried restarting server and it didn't require a re login
 
 - [X] multi-threaded
 
