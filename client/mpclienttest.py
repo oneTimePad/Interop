@@ -6,6 +6,7 @@ try:
     lat = 0
     while True:
             server.telemetry(float(lat),float(14),float(15),float(16))
+            print("Sent telemetry.")
             lat+=1
             sleep(1)
 except IOError as e:

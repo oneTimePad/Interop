@@ -8,7 +8,6 @@ from . import Client, AsyncClient, InteropError, Target, Telemetry
 import argparse
 import pdb
 
-
 '''
 @RUAutonomous-autopilot
 
@@ -80,13 +79,47 @@ class RelayService:
 			#@RUAutonomous-autopilot
 			#might be where exception catching goes, look for a InteropError obj
 			#If the server dies, should it resend the data?
-			print "[DEBUG] posting telementry"
-			try:
-				self.client.post_telemetry(t).result()
-			except InteropError as e:
-					print "POST resulting in Server error response:"
-					print e
-					print "Server Might be down.\n Trying again at 1Hz"
+			print "[DEBUG] posting telemetry"
+			successful = False
+			while not successful:
+				try:
+					self.client.post_telemetry(t).result()
+					successful = True
+				except InteropError as e:
+					#@RUAutonomous-autopilot
+					#We might need more exceptions here and below
+					code,reason,text = e.errorData()
+					print "POST /api/telmetry has failed."
+					print "Error code : %d Error Reason: %s" %(code,reason)
+					print "Text Reason: \n%s" %(text)
+
+					if code == 400:
+						print "Invalid telemetry data. Stopping."
+						sys.exit(1)
+
+					elif code == 404:
+						print "Server Might be down.\n Trying again at 1Hz"
+						#rtry sending after 1Hz
+						for result in telemAgain(t,self.client):
+							if result == None:
+								break
+							print "Request Results in"
+							print result
+							sleep(1)
+
+					elif code == 405 or code == 500:
+						print "Internal error (code: %s). Stopping." % (str(code))
+						sys.exit(1)
+
+					elif code == 403:
+						#@RUAutonomous-autopilot
+						# TODO: Ask to reenter credentials after n tries or reset that mysterious cookie
+						print "Server has not authenticated this login. Attempting to relogin."
+						username = os.getenv('INTEROP_USER','testuser')
+						password = os.getenv('INTEROP_PASS','testpass')
+						self.post('/api/login', data={'username': username, 'password': password})
+				except requests.ConnectionError:
+					print "A server at %s was not found. Waiting for a second, then retrying." % (server)
 					#rtry sending after 1Hz
 					for result in telemAgain(t,self.client):
 						if result == None:
@@ -94,8 +127,9 @@ class RelayService:
 						print "Request Results in"
 						print result
 						sleep(1)
-
-
+				except:
+					print "Unknown error: %s" % (sys.exc_info()[0])
+					raise
 
 			print "Fixed"
 			#calc time between consecutive posts
@@ -113,38 +147,38 @@ class TelemetryClient:
 
 	def __init__(self,server,username,password):
 		self.client = None
-		try:
-
-
-			self.client = AsyncClient(server,username,password)
-			print "[DEBUG]: Server connection success"
-		#deals with login error
-		except InteropError as serverExp:
-
-			code,reason,text =  serverExp.errorData()
-
-			if text == "Invalid Credentials.":
+		while not self.client:
+			try:
+				self.client = AsyncClient(server,username,password)
+			except InteropError as serverExp:
+				#@RUAutonomous-autopilot
+				#We might need more exceptions here and below
+				code,reason,text =  serverExp.errorData()
 				print "Error code : %d Error Reason: %s" %(code,reason)
-				print "Exiting wrong username/password combo"
-				print "Current user:%s pass:%s" %(username,password)
-				sys.exit(1)
-
-
-			elif code ==404:
-				print "Server not found return 404\n"
 				print "Reason: \n%s" %(text)
-				sys.exit(1)
-			#@RUAutonomous-autopilot
-			#We might need more exceptions here and below
 
+				if code == 400:
+					print "The current user/pass combo (%s, %s) is wrong. Please try again." % (username,password)
+					enterLoginCredentials()
+					username = os.getenv('INTEROP_USER','testuser')
+					password = os.getenv('INTEROP_PASS','testpass')
 
-		#deals with timeout error
-		except requests.ConnectionError:
+				elif code == 404:
+					print "A server at %s was not found. Please reenter the server IP address." % (server)
+					enterAUVSIServerAddress()
+					server = os.getenv('INTEROP_SERVER','http://localhost')
 
-			print "Error: Connection to server failed"
-			sys.exit(1)
+				elif code == 500:
+					print "Internal issues with their code. Stopping."
+					sys.exit(1)
+			#deals with timeout error
+			except requests.ConnectionError:
+				print "A server at %s was not found. Please reenter the server IP address." % (server)
+				enterAUVSIServerAddress()
+				server = os.getenv('INTEROP_SERVER','http://localhost')
 
-
+		print "[DEBUG]: Server successfully connected to %s." % (server)
+		print "[DEBUG]: Logged in as %s." % (username)
 
 	def __enter__(self):
 		return self
@@ -184,16 +218,44 @@ def start_server(args):
 	#start
 	server.serve_forever()
 
+def enterAUVSIServerAddress():
+	baseURL = raw_input('Enter base URL (default when nothing is found is localhost): ')
+	port = raw_input('Enter port (default is none): ')
+
+	fullURL = ''
+	if baseURL:
+		fullURL = 'http://' + baseURL + (':' + port if port else '')
+
+	if fullURL:
+		os.environ['INTEROP_SERVER'] = fullURL
+	elif not os.getenv('INTEROP_SERVER'):
+		os.environ['INTEROP_SERVER'] = 'http://localhost'
+
+	# print '[DEBUG] Server address: %s' % (os.getenv('INTEROP_SERVER', 'Default'))
+
+def enterLoginCredentials():
+	username = raw_input('Enter username (default when nothing is found is testuser): ')
+	password = raw_input('Enter password (default is testpass): ')
+
+	if username:
+		os.environ['INTEROP_USER'] = username
+	elif not os.getenv('INTEROP_USER'):
+		os.environ['INTEROP_USER'] = 'testuser'
+
+	if password:
+		os.environ['INTEROP_PASS'] = password
+	elif not os.getenv('INTEROP_PASS'):
+		os.environ['INTEROP_PASS'] = 'testpass'
+
+	# print '[DEBUG] User/pass: (%s/%s)' % (os.getenv('INTEROP_USER', 'Default'), os.getenv('INTEROP_PASS', 'Default'))
+
 if __name__ == '__main__':
+	enterLoginCredentials()
 
 	#get paramters from environment variables
 	server = os.getenv('INTEROP_SERVER','http://localhost')
 	username = os.getenv('INTEROP_USER','testuser')
 	password = os.getenv('INTEROP_PASS','testpass')
-
-
-
-
 
 	'''
 	take args for RPC server host/port
