@@ -19,3 +19,8 @@ our interop code, not theirs
 - [X] mission planner client program
 
 - [ ] Nagle's Algorithm
+- Wait until testing to see if it is necessary. This is NOT an "easy" option to change for some reason. It may also already be off.
+
+- [ ] After dropping a certain amount of data, ask to reenter server address and/or relogin. Alternatively, allow a user to stop the constant dropping manually at any point (possibly multithread?)
+
+- [ ] Cover the concurrency and requests errors.
