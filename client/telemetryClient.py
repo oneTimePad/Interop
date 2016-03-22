@@ -38,26 +38,29 @@ use ports above 1020 to avoid superuser permissions
 '''
 allows for retry of telemetry sending if server dies
 telemetry post tries to send last failed attempt. Then continue to sends next telem
+After asking, we will just drop data
 '''
-def tryAgain(reconnect,TOO_MANY):
-	reconnect = [reconnect]
-	def tryTelemAgain(t,client):
+# def tryAgain(reconnect,TOO_MANY):
+# 	reconnect = [reconnect]
+# 	def tryTelemAgain(t,client):
 
-		while True:
-			if reconnect[0] == TOO_MANY:
-				print "Stopping to conserve...Server must be in critical state."
-				sys.exit(1)
+# 		while True:
+# 			if reconnect[0] == TOO_MANY:
+# 				print "Stopping to conserve...Server must be in critical state."
+# 				sys.exit(1)
 
-			try:
+# 			try:
 
-				res =client.post_telemetry(t).result()
-				yield res
-			except InteropError as e:
-				reconnect[0]+=1
-				yield e
+# 				res =client.post_telemetry(t).result()
+# 				yield res
+# 			except InteropError as e:
+# 				reconnect[0]+=1
+# 				yield e
+# 			except requests.ConnectionError as e:
+# 				reconnect[0] += 1
+# 				yield e
 
-
-	return tryTelemAgain
+# 	return tryTelemAgain
 
 '''
 class for allowing communication to mission planner
@@ -68,7 +71,7 @@ class RelayService:
 
 	#mission planner calls for telemetry post
 	def telemetry(self,lat,lon,alt,heading):
-			telemAgain = tryAgain(0,10)
+			# telemAgain = tryAgain(0,10)
 			#telementry object
 			t = Telemetry(latitude=lat,
             		longitude=lon,
@@ -99,13 +102,7 @@ class RelayService:
 
 					elif code == 404:
 						print "Server Might be down.\n Trying again at 1Hz"
-						#rtry sending after 1Hz
-						for result in telemAgain(t,self.client):
-							if result == None:
-								break
-							print "Request Results in"
-							print result
-							sleep(1)
+						sleep(1)
 
 					elif code == 405 or code == 500:
 						print "Internal error (code: %s). Stopping." % (str(code))
@@ -118,18 +115,43 @@ class RelayService:
 						username = os.getenv('INTEROP_USER','testuser')
 						password = os.getenv('INTEROP_PASS','testpass')
 						self.post('/api/login', data={'username': username, 'password': password})
+
 				except requests.ConnectionError:
 					print "A server at %s was not found. Waiting for a second, then retrying." % (server)
-					#rtry sending after 1Hz
-					for result in telemAgain(t,self.client):
-						if result == None:
-							break
-						print "Request Results in"
-						print result
-						sleep(1)
+					sleep(1)
+
+				except requests.Timeout:
+					print "The server timed out. Waiting for a second, then retrying."
+					sleep(1)
+
+				except requests.TooManyRedirects:
+					print "The URL redirects to itself; reenter the address:"
+					enterAUVSIServerAddress()
+					self.client.url = os.getenv('INTEROP_SERVER')
+					sleep(1)
+
+				except requests.URLRequired:
+					print "The URL is invalid; reenter the address:"
+					enterAUVSIServerAddress()
+					self.client.url = os.getenv('INTEROP_SERVER')
+					sleep(1)
+
+				except requests.RequestException as e:
+					# catastrophic error. bail.
+					print e
+					sys.exit(1)
+
+				except concurrent.futures.CancelledError:
+					print "Multithreading failed. Waiting for a second, then retrying."
+					sleep(1)
+
+				except concurrent.futures.TimeoutError:
+					print "Multithreading timed out. Waiting for a second, then retrying."
+					sleep(1)
+
 				except:
 					print "Unknown error: %s" % (sys.exc_info()[0])
-					raise
+					sys.exit(1)
 
 			print "Fixed"
 			#calc time between consecutive posts
@@ -176,6 +198,37 @@ class TelemetryClient:
 				print "A server at %s was not found. Please reenter the server IP address." % (server)
 				enterAUVSIServerAddress()
 				server = os.getenv('INTEROP_SERVER','http://localhost')
+
+			except requests.Timeout:
+				print "The server timed out. Waiting for a second, then retrying."
+				sleep(1)
+
+			except requests.TooManyRedirects:
+				print "The URL redirects to itself; reenter the address:"
+				enterAUVSIServerAddress()
+				server = os.getenv('INTEROP_SERVER','http://localhost')
+
+			except requests.URLRequired:
+				print "The URL is invalid; reenter the address:"
+				enterAUVSIServerAddress()
+				server = os.getenv('INTEROP_SERVER','http://localhost')
+
+			except requests.RequestException as e:
+				# catastrophic error. bail.
+				print e
+				sys.exit(1)
+
+			except concurrent.futures.CancelledError:
+				print "Multithreading failed. Waiting for a second, then retrying."
+				sleep(1)
+
+			except concurrent.futures.TimeoutError:
+				print "Multithreading timed out. Waiting for a second, then retrying."
+				sleep(1)
+
+			except:
+				print "Unknown error: %s" % (sys.exc_info()[0])
+				sys.exit(1)
 
 		print "[DEBUG]: Server successfully connected to %s." % (server)
 		print "[DEBUG]: Logged in as %s." % (username)
