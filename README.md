@@ -23,4 +23,4 @@ our interop code, not theirs
 
 - [ ] After dropping a certain amount of data, ask to reenter server address and/or relogin. Alternatively, allow a user to stop the constant dropping manually at any point (possibly multithread?)
 
-- [ ] Cover the concurrency and requests errors.
+- [X] Cover the concurrency and requests errors.
