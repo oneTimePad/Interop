@@ -71,22 +71,23 @@ class RelayService:
 
 	#mission planner calls for telemetry post
 	def telemetry(self,lat,lon,alt,heading):
+			startTime = time()
 			# telemAgain = tryAgain(0,10)
 			#telementry object
 			t = Telemetry(latitude=lat,
             		longitude=lon,
 					altitude_msl=alt,
 					uas_heading=heading)
-			print lat
+			print "hi"
 			#post it
 			#@RUAutonomous-autopilot
 			#might be where exception catching goes, look for a InteropError obj
-			#If the server dies, should it resend the data?
-			print "[DEBUG] posting telemetry"
 			successful = False
 			while not successful:
 				try:
+					postTime = time()
 					self.client.post_telemetry(t).result()
+					print "Time to post: %f" % (time() - postTime)
 					successful = True
 				except InteropError as e:
 					#@RUAutonomous-autopilot
@@ -153,14 +154,7 @@ class RelayService:
 					print "Unknown error: %s" % (sys.exc_info()[0])
 					sys.exit(1)
 
-			print "Fixed"
-			#calc time between consecutive posts
-			#new_time = time()
-			#print 1 / (new_time - self.last_telemetry)
-			#self.last_telemetry = new_time
-
-			return True
-
+			return startTime
 
 '''
 wraps around AsyncClient for exception catching
@@ -238,7 +232,7 @@ class TelemetryClient:
 
 	#ends nicely
 	def __exit__(self,type,value,traceback):
-			print "HEERE"
+			print "Quit"
 			if self.client:
 				self.client.client.session.close()
 			#if an exception caused this, explain

@@ -5,32 +5,50 @@ import xmlrpclib
 from time import sleep, time
 
 # target upload rate in Hz
-targetRate = 12
+targetRate = 10
 
 # according to http://auvsi-suas-competition-interoperability-system.readthedocs.org/en/latest/integration/hints.html
 # the server takes at most 0.011 seconds to do its thing
-serveTime = 0
+guessServeTime = 0
+
+# server ip
+host = '127.0.0.1'
+port = '9000'
 
 def main():
+	server = xmlrpclib.ServerProxy('http://' + host + ':' + port)
+
+	# try to "fix" the average
+	makeUpTime = 0
+
 	while True:
 		try:
-		    server = xmlrpclib.ServerProxy('http://127.0.0.1:9000')
-		    alt = 0
-		    while True:
-		    	initTime = time()
-		        alt+=1
+			beforeTelTime = time()
+			beforeTelemTime = time()
 
-		        server.telemetry(float(cs.lat), float(cs.lng),alt,float(cs.groundcourse))
+			lat = float(cs.lat)
+			lng = float(cs.lng)
+			alt = float(cs.alt)
+			groundcourse = float(cs.groundcourse)
 
-		        telTime = time() - initTime
-		        print("Time to send telemetry: %f" % telTime)
+			print "Time to get telemetry: %f" % (time() - beforeTelemTime)
 
-		        timeToSleep = (1 / float(targetRate)) - telTime - serveTime
-		        if timeToSleep > 0:
-		        	sleep(timeToSleep)
+			beforeServeTime = time()
+			afterServeTime = server.telemetry(lat, lng, alt, groundcourse)
+
+			print "Time to send to RPC: %f" % (afterServeTime - beforeServeTime)				
+
+			telTime = time() - beforeTelTime
+			timeToSleep = (1 / float(targetRate)) - telTime - guessServeTime - makeUpTime
+			if timeToSleep > 0:
+				sleep(timeToSleep)
+				makeUpTime = 0
+			else:
+				makeUpTime = -timeToSleep
+
 		except IOError as e:
 		    print "Failed to connect to RPC:"
 		    print e
-		    sys.exit(1)
+		    sleep(1)
 
 main()
