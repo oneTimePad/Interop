@@ -15,6 +15,8 @@ guessServeTime = 0
 host = '127.0.0.1'
 port = '9000'
 
+FEET_PER_METER = 3.28084
+
 def main():
 	server = xmlrpclib.ServerProxy('http://' + host + ':' + port)
 
@@ -28,7 +30,7 @@ def main():
 
 			lat = float(cs.lat)
 			lng = float(cs.lng)
-			alt = float(cs.altoffsethome + 22)
+			alt = float(cs.altoffsethome) / FEET_PER_METER + 22
 			groundcourse = float(cs.groundcourse)
 
 			print "Time to get telemetry: %f" % (time() - beforeTelemTime)
