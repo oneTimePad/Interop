@@ -28,7 +28,7 @@ def main():
 
 			lat = float(cs.lat)
 			lng = float(cs.lng)
-			alt = float(cs.alt)
+			alt = float(cs.altoffsethome + 22)
 			groundcourse = float(cs.groundcourse)
 
 			print "Time to get telemetry: %f" % (time() - beforeTelemTime)
