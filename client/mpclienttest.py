@@ -5,7 +5,7 @@ import xmlrpclib
 from time import sleep, time
 
 # target upload rate in Hz
-targetRate = 10
+targetRate = 13
 
 # according to http://auvsi-suas-competition-interoperability-system.readthedocs.org/en/latest/integration/hints.html
 # the server takes at most 0.011 seconds to do its thing
@@ -23,6 +23,7 @@ def main():
 	# try to "fix" the average
 	makeUpTime = 0
 
+	retLat = 0
 	while True:
 		try:
 			beforeTelTime = time()
@@ -30,7 +31,8 @@ def main():
 
 			lat = float(cs.lat)
 			lng = float(cs.lng)
-			alt = float(cs.altoffsethome) / FEET_PER_METER + 22
+			alt = retLat # float(cs.altoffsethome) / FEET_PER_METER + 22
+			retLat += 1
 			groundcourse = float(cs.groundcourse)
 
 			print "Time to get telemetry: %f" % (time() - beforeTelemTime)

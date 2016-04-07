@@ -267,16 +267,13 @@ def start_server(args):
 
 def enterAUVSIServerAddress():
 	baseURL = raw_input('Enter base URL (default when nothing is found is localhost): ')
+	if not baseURL:
+		baseURL = 'localhost'
 	port = raw_input('Enter port (default is none): ')
 
-	fullURL = ''
-	if baseURL:
-		fullURL = 'http://' + baseURL + (':' + port if port else '')
+	fullURL = 'http://' + baseURL + (':' + port if port else '')
 
-	if fullURL:
-		os.environ['INTEROP_SERVER'] = fullURL
-	elif not os.getenv('INTEROP_SERVER'):
-		os.environ['INTEROP_SERVER'] = 'http://localhost'
+	os.environ['INTEROP_SERVER'] = fullURL	
 
 	# print '[DEBUG] Server address: %s' % (os.getenv('INTEROP_SERVER', 'Default'))
 
