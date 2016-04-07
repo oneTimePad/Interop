@@ -115,6 +115,7 @@ class RelayService:
 						print "Server has not authenticated this login. Attempting to relogin."
 						username = os.getenv('INTEROP_USER','testuser')
 						password = os.getenv('INTEROP_PASS','testpass')
+						#@RUAutonomous-autopilot --> self.post doesn't exist, self.client.post?
 						self.post('/api/login', data={'username': username, 'password': password})
 
 				except requests.ConnectionError:
@@ -273,7 +274,7 @@ def enterAUVSIServerAddress():
 
 	fullURL = 'http://' + baseURL + (':' + port if port else '')
 
-	os.environ['INTEROP_SERVER'] = fullURL	
+	os.environ['INTEROP_SERVER'] = fullURL
 
 	# print '[DEBUG] Server address: %s' % (os.getenv('INTEROP_SERVER', 'Default'))
 
