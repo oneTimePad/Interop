@@ -1,9 +1,9 @@
 import sys
 sys.path.append('c:\python27\lib')
 
-import xmlrpclib
+from mpclient import Client
 from time import sleep, time
-
+import pdb
 # target upload rate in Hz
 targetRate = 13
 
@@ -11,14 +11,22 @@ targetRate = 13
 # the server takes at most 0.011 seconds to do its thing
 guessServeTime = 0
 
-# server ip
-host = '127.0.0.1'
-port = '9000'
+
 
 FEET_PER_METER = 3.28084
 
+url = 'http://localhost:2000'
+username = 'l'
+password = 'l'
+
+
 def main():
-	server = xmlrpclib.ServerProxy('http://' + host + ':' + port)
+	pdb.set_trace()
+	client = None
+	try:
+		client = Client(url,username,password)
+	except Exception:
+		pass #except something, not sure what yet
 
 	# try to "fix" the average
 	makeUpTime = 0
@@ -40,7 +48,7 @@ def main():
 			beforeServeTime = time()
 			afterServeTime = server.telemetry(lat, lng, alt, groundcourse)
 
-			print "Time to send to RPC: %f" % (afterServeTime - beforeServeTime)				
+			print "Time to send to RPC: %f" % (afterServeTime - beforeServeTime)
 
 			telTime = time() - beforeTelTime
 			timeToSleep = (1 / float(targetRate)) - telTime - guessServeTime - makeUpTime

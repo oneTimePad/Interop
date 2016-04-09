@@ -1,7 +1,13 @@
 from concurrent.futures import ThreadPoolExecutor
 import requests
+import json
 
 workers = 5
+
+#TODO:need to add authoriation header
+#check how to parse token
+#add returning of requests
+#returning of exceptions
 class _Client(object):
 
     def __init__(self,url,username,password,timeout=5):
@@ -10,19 +16,20 @@ class _Client(object):
         self.username = username
         self.password = password
         self.login()
-    def login():
-        resp = Request('POST',self.url+'/mp/login',data= {'username':self.username,'password':self.password})
-        token = resp.json()
+
+    def login(self):
+        resp = requests.post(self.url+'/mp/login',headers={'Content-Type':'application/json'},data= json.dumps({'password':self.password,'username':self.username}))
+        #token = resp.json()
 
     def post_telemetry(self,data):
-        resp = Request('POST',self.url+'/mp/postTelemetry',data=data)
+        resp = requests.post(self.url+'/mp/postTelemetry',data=data)
         #respond
     def get_server_info(self):
-        resp = Request('GET',self.url+'/mp/getServerInfo')
+        resp = requests.get(self.url+'/mp/getServerInfo')
         #parse and return
 
     def get_obstacles(self):
-        resp = Request('GET',self.url+'/mp/getObstacles')
+        resp = requests.get(self.url+'/mp/getObstacles')
         #parse and return
 
 class Client(object):
