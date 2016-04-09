@@ -1,6 +1,0 @@
-There freeze file is the txt file uploaded.
-
-You can look for the interop repo and clone it. Don't actually upload their
-code since it changes.
-
-I will create a repo for OUR interop code
