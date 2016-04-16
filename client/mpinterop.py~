@@ -57,7 +57,7 @@ def main():
 			retLat += 1
 
 			print "Time to get telemetry: %f" % (time() - beforeTelemTime)
-			telemetry = {'latitude':lat,'longitude':lng,'altitude_msl':alt,'uas_heading':groundcourse}
+			telemetry = {'latitude':lat,'longitude':lng,'altitude':alt,'uas_heading':groundcourse}
 
 			beforeServeTime = time()
 

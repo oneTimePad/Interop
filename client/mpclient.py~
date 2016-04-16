@@ -49,7 +49,7 @@ class _Client(object):
 
     def post_telemetry(self,data):
         self.refresh()
-        resp = requests.post(self.url+'/mp/postTelemetry',data=data, headers={'Authorization':'JWT '+self.token['token']})
+        resp = requests.post(self.url+'/mp/postTelemetry',data=data, headers={'Authorization':'JWT '+self.token})
         return (resp.json()['time'],resp.json()['error'])
         #respond
     def get_server_info(self):
