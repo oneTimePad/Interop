@@ -16,12 +16,12 @@ guessServeTime = 0
 FEET_PER_METER = 3.28084
 
 url = 'http://localhost:2000'
-username = 'l'
-password = 'l'
+username = 'lol4'
+password = 'lol4'
 
 
 def main():
-	pdb.set_trace()
+
 	client = None
 	try:
 		client = Client(url,username,password)
@@ -34,7 +34,7 @@ def main():
 	retLat = 0
 	while True:
 		try:
-			beforeTelTime = time()
+
 			beforeTelemTime = time()
 
 			lat = float(cs.lat)
@@ -44,11 +44,16 @@ def main():
 			groundcourse = float(cs.groundcourse)
 
 			print "Time to get telemetry: %f" % (time() - beforeTelemTime)
+			telemetry = {'latitude':lat,'longitude':lng,'altitude':alt,'uas_heading':groundcourse}
 
 			beforeServeTime = time()
-			afterServeTime = server.telemetry(lat, lng, alt, groundcourse)
 
-			print "Time to send to RPC: %f" % (afterServeTime - beforeServeTime)
+			afterServeTime,error = client.post_telemetry(telemetry)
+
+			if error:
+				print error
+
+			print "Time to send to Django: %f" % (afterServeTime - beforeServeTime)
 
 			telTime = time() - beforeTelTime
 			timeToSleep = (1 / float(targetRate)) - telTime - guessServeTime - makeUpTime
@@ -59,7 +64,7 @@ def main():
 				makeUpTime = -timeToSleep
 
 		except IOError as e:
-		    print "Failed to connect to RPC:"
+		    print "Failed to connect to Django:"
 		    print e
 		    sleep(1)
 
