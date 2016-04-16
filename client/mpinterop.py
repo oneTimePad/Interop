@@ -3,6 +3,7 @@ sys.path.append('c:\python27\lib')
 
 from mpclient import Client
 from time import sleep, time
+from dronekit import connect
 import pdb
 # target upload rate in Hz
 targetRate = 13
@@ -15,7 +16,7 @@ guessServeTime = 0
 
 FEET_PER_METER = 3.28084
 
-url = 'http://localhost:2000'
+url = 'http://172.31.66.131:2000'
 username = 'lol4'
 password = 'lol4'
 
@@ -28,6 +29,12 @@ def main():
 	except Exception:
 		pass #except something, not sure what yet
 
+	try:
+		drone = connect('127.0.0.1:14550',wait_ready=True)
+	except Exception as e:
+		print e
+
+
 	# try to "fix" the average
 	makeUpTime = 0
 
@@ -37,11 +44,13 @@ def main():
 
 			beforeTelemTime = time()
 
-			lat = float(cs.lat)
-			lng = float(cs.lng)
-			alt = retLat # float(cs.altoffsethome) / FEET_PER_METER + 22
+			lat = float(drone.location.global_frame.lat)
+			lng = float(drone.location.global_frame.lon)
+			alt = float(drone.location.global_frame.alt)
+			header = float(drone.heading)
+			 # float(cs.altoffsethome) / FEET_PER_METER + 22
 			retLat += 1
-			groundcourse = float(cs.groundcourse)
+			#groundcourse = float(cs.groundcourse)
 
 			print "Time to get telemetry: %f" % (time() - beforeTelemTime)
 			telemetry = {'latitude':lat,'longitude':lng,'altitude':alt,'uas_heading':groundcourse}
