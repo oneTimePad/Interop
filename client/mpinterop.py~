@@ -61,7 +61,7 @@ def main():
 
 			afterTelem = time()
 			#sleep(.05)
-						
+			'''			
 			timeToSleep = (1 / float(targetRate)) -(afterTelem-beforeTelem)
 			if timeToSleep > 0:
 				sleep(timeToSleep)
@@ -69,7 +69,7 @@ def main():
 			else:
 				makeUpTime = -timeToSleep
 
-				
+				'''
 		except IOError as e:
 		    print "Failed to connect to Django:"
 		    print e
