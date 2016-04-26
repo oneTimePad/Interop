@@ -31,13 +31,12 @@ class _Client(object):
 
 
     def login(self):
-        resp = requests.post(self.url+'/drone/login',headers={'Content-Type':'application/json; charset=UTF-8'},data= json.dumps({'password':self.password,'username':self.username}))
+        resp = requests.post(self.url+'/interop/login',headers={'Content-Type':'application/json; charset=UTF-8'},data= json.dumps({'password':self.password,'username':self.username}))
 
         if resp.status_code == 200:
             self.parse_token(resp)
         else:
-            print "END OF THE WORLD!"
-            sys.exit(1)
+            raise Exception(resp.status_code)
 
     def refresh(self):
         if long(self.exp)-long(time())<=3000:
