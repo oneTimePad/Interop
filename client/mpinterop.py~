@@ -15,9 +15,9 @@ guessServeTime = 0
 
 FEET_PER_METER = 3.28084
 
-url = 'http://192.168.43.100:2000'
-username = 'lol4'
-password = 'lol4'
+url = 'http://172.31.65.47:2000'
+username = 'telemuser'
+password = 'ruautonomous'
 
 
 def main():
@@ -61,7 +61,7 @@ def main():
 
 			afterTelem = time()
 			#sleep(.05)
-			'''			
+						
 			timeToSleep = (1 / float(targetRate)) -(afterTelem-beforeTelem)
 			if timeToSleep > 0:
 				sleep(timeToSleep)
@@ -69,7 +69,7 @@ def main():
 			else:
 				makeUpTime = -timeToSleep
 
-				'''
+				
 		except IOError as e:
 		    print "Failed to connect to Django:"
 		    print e

@@ -16,8 +16,8 @@ guessServeTime = 0
 FEET_PER_METER = 3.28084
 
 url = 'http://192.168.43.100:2000'
-username = 'lol4'
-password = 'lol4'
+username = 'telemuser'
+password = 'ruautonomous'
 
 
 def main():
