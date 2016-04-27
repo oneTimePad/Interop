@@ -1,26 +1,19 @@
 # Interop
-our interop code, not theirs
+interoperability client programs
 
 [Interop Docs](https://auvsi-suas-competition-interoperability-system.readthedocs.org/en/latest/integration/hints.html)
 
+
+### Contains:
+	- Telemetry Interoperability client
+	- Server info/ SDA obstacles Interoperability client
+
 ###Client Program checklist:
 
-- [X] allow mission planner integration
+- [ ] add server obstacles/ server info program here
+	- [ ] display map
+	- [ ] display server time
+	- [ ] display all alerts, notify user somehow
+	- [ ] catch all errors
+	- [ ] program input should be (can use argparse) (django url, django username, django password)
 
-- [ ] tested for 1Hz update rate
-
-- [X] catches server failures
-
-- [ ] re-logins if necessary
-- No cookie found, tried restarting server and it didn't require a re login
-
-- [X] multi-threaded
-
-- [X] mission planner client program
-
-- [ ] Nagle's Algorithm
-- Wait until testing to see if it is necessary. This is NOT an "easy" option to change for some reason. It may also already be off.
-
-- [ ] After dropping a certain amount of data, ask to reenter server address and/or relogin. Alternatively, allow a user to stop the constant dropping manually at any point (possibly multithread?)
-
-- [X] Cover the concurrency and requests errors.
