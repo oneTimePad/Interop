@@ -65,6 +65,24 @@ if __name__ == "__main__"
 			alt = float(drone.location.global_frame.alt)
 			groundcourse = float(drone.heading)
 
+
+            latdeg = round(lat)
+            latmin = round((lat-latdeg)*60)
+            latsec = round(((lat-latdeg)*60-latmin)*3600)
+
+            londeg = round(lon)
+            lonmin = round((lon-londeg)*60)
+            lonsec = round(((lon-londeg)*60-lonmin)*3600)
+
+            print "----------TIME STAMP-------------\n"
+            print "         "+beforeTelem+"        \n"
+            print bcolors.OKBLUE+"Telemtry Data:\n" \
+                        "Latitude: "+ latdeg+"deg "+latmin+"min "+latsec+"sec\n"+ \
+                        "Longitude: "+londeg+"deg "+lonmin+"min "+lonsec+"sec\n"+ \
+                        "Altitude: "+alt*3.28084+"ft\n"+ \
+                        "Heading: "+heading+"deg"+bcolors.ENDC+"\n" 
+
+
 			#forumlate json of data
 			telemetry = {'latitude':lat,'longitude':lng,'altitude_msl':alt,'uas_heading':groundcourse}
 
@@ -76,6 +94,7 @@ if __name__ == "__main__"
 			if error:
 				print bcolors.FAIL+"Continuing but recieved an error from Django:"+bcolors.ENDC+"\n"
 				print error
+            print bcolors.OKGREEN+"--------------Telemtry Posted----------------"+bcolors.ENDC+"\n"
 
 			afterTelem = time()
 
