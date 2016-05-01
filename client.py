@@ -7,10 +7,6 @@ import sys
 from time import time
 workers = 5
 
-#TODO:need to add authoriation header
-#check how to parse token
-#add returning of requests
-#returning of exceptions
 class _Client(object):
 
     def __init__(self,url,username,password,timeout=5):
@@ -47,19 +43,10 @@ class _Client(object):
                 self.parse_token(resp)
 
     def post_telemetry(self,data):
-        self.refresh()
+        #self.refresh()
         resp = requests.post(self.url+'/interop/postTelemetry',data=data, headers={'Authorization':'JWT '+self.token['token']})
         return (resp.json()['time'],resp.json()['error'])
         #respond
-    def get_server_info(self):
-        self.refresh()
-        resp = requests.get(self.url+'/interop/getServerInfo')
-        #parse and return
-
-    def get_obstacles(self):
-        self.refresh()
-        resp = requests.get(self.url+'/interop/getObstacles')
-        #parse and return
 
 class Client(object):
     def __init__(self,url,username,password):
@@ -69,9 +56,3 @@ class Client(object):
 
     def post_telemetry(self,data):
         return self.executor.submit(self.client.post_telemetry,data)
-
-    def get_server_info(self):
-        return self.executor.submit(self.client.get_server_info)
-
-    def get_obstacles(self):
-        return self.executor.submit(self.client.get_obstacles)
