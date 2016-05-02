@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
 
 			#forumlate json of data
-			telemetry = {'latitude':lat,'longitude':lon,'altitude_msl':alt,'uas_heading':groundcourse}
+			telemetry = {'latitude':lat,'longitude':lng,'altitude_msl':alt,'uas_heading':groundcourse}
 
 			#post to django
 			fut= client.post_telemetry(telemetry)
