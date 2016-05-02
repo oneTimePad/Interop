@@ -22,8 +22,8 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-if __name__ == "__main__"
-	parser = arg.ArgumentParser()
+if __name__ == "__main__":
+	parser = argparse.ArgumentParser()
 	parser.add_argument("url",help="url for django server (http://ip:port)",type=str)
 	parser.add_argument("username",help="username for django server",type=str)
 	parser.add_argument("password",help="password for django server",type=str)
@@ -38,7 +38,7 @@ if __name__ == "__main__"
 	#connect to django
 	try:
 		client = Client(url,username,password)
-	except Exception:
+	except Exception as e:
 		print bcolors.FAIL+"Received Exception while contacting Django"+bcolors.ENDC+"\n"
 		print e
 		sys.exit(1)
@@ -66,21 +66,21 @@ if __name__ == "__main__"
 			groundcourse = float(drone.heading)
 
 
-            latdeg = round(lat)
-            latmin = round((lat-latdeg)*60)
-            latsec = round(((lat-latdeg)*60-latmin)*3600)
+			latdeg = round(lat)
+			latmin = round((lat-latdeg)*60)
+			latsec = round(((lat-latdeg)*60-latmin)*3600)
 
-            londeg = round(lon)
-            lonmin = round((lon-londeg)*60)
-            lonsec = round(((lon-londeg)*60-lonmin)*3600)
+			londeg = round(lon)
+			lonmin = round((lon-londeg)*60)
+			lonsec = round(((lon-londeg)*60-lonmin)*3600)
 
-            print "----------TIME STAMP-------------\n"
-            print "         "+beforeTelem+"        \n"
-            print bcolors.OKBLUE+"Telemtry Data:\n" \
-                        "Latitude: "+ latdeg+"deg "+latmin+"min "+latsec+"sec\n"+ \
-                        "Longitude: "+londeg+"deg "+lonmin+"min "+lonsec+"sec\n"+ \
-                        "Altitude: "+alt*3.28084+"ft\n"+ \
-                        "Heading: "+heading+"deg"+bcolors.ENDC+"\n" 
+			print "----------TIME STAMP-------------\n"
+			print "         "+beforeTelem+"        \n"
+			print bcolors.OKBLUE+"Telemtry Data:\n" \
+			"Latitude: "+ latdeg+"deg "+latmin+"min "+latsec+"sec\n"+ \
+		               "Longitude: "+londeg+"deg "+lonmin+"min "+lonsec+"sec\n"+ \
+		               "Altitude: "+alt*3.28084+"ft\n"+ \
+		               "Heading: "+heading+"deg"+bcolors.ENDC+"\n" 
 
 
 			#forumlate json of data
@@ -94,7 +94,7 @@ if __name__ == "__main__"
 			if error:
 				print bcolors.FAIL+"Continuing but recieved an error from Django:"+bcolors.ENDC+"\n"
 				print error
-            print bcolors.OKGREEN+"--------------Telemtry Posted----------------"+bcolors.ENDC+"\n"
+				print bcolors.OKGREEN+"--------------Telemtry Posted----------------"+bcolors.ENDC+"\n"
 
 			afterTelem = time()
 
