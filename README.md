@@ -7,13 +7,8 @@ interoperability client programs
 ### Contains:
 	- Telemetry Interoperability client
 	- Server info/ SDA obstacles Interoperability client
-
+	- Load Mission Interoperability client
 ###Client Program checklist:
 
-- [ ] add server obstacles/ server info program here
-	- [ ] display map
-	- [ ] display server time
-	- [ ] display all alerts, notify user somehow
-	- [ ] catch all errors
-	- [ ] program input should be (can use argparse) (django url, django username, django password)
-
+- [ ] add SDA fetch obstacles
+- [ ] add fetch mission (waypoints, search path ...)

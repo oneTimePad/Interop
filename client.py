@@ -48,6 +48,9 @@ class _Client(object):
         return (resp.json()['time'],resp.json()['error'])
         #respond
 
+	def get_obstacles(self):
+		pass
+
 class Client(object):
     def __init__(self,url,username,password):
 
