@@ -4,7 +4,7 @@ import json
 import base64
 import pdb
 import sys
-from time import time
+import time
 workers = 5
 
 class _Client(object):
@@ -35,7 +35,7 @@ class _Client(object):
             raise Exception(resp.status_code)
 
     def refresh(self):
-        if long(self.exp)-long(time())<=3000:
+        if long(self.exp)-long(time.time())<=3000:
             resp = requests.post(self.url+'/interop/refresh',headers={'Content-Type':'application/json; charset=UTF-8'},data= json.dumps({'token':self.token}))
             if resp.status_code == 400:
                 self.login()
@@ -44,7 +44,7 @@ class _Client(object):
 
     def post_telemetry(self,data):
         #self.refresh()
-        resp = requests.post(self.url+'/interop/postTelemetry',data=data, headers={'Authorization':'JWT '+self.token['token']})
+        resp =requests.post(self.url+'/interop/postTelemetry',data=data.serialize(), headers={'Authorization':'JWT '+self.token['token']})
         return (resp.json()['time'],resp.json()['error'])
         #respond
 

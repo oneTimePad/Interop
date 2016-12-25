@@ -1,15 +1,16 @@
 import sys
 
-from client import Client
+from interop import Client
+from interop import Telemetry
 from time import sleep, time
 from dronekit import connect
 import argparse
 import pdb
 
 # target upload rate in Hz
-TARGET_RATE = 13
+TARGET_RATE = 10
 FEET_PER_METER = 3.28084
-MAV_SERVER = '127.0.0.1:14550'
+MAV_SERVER = '192.168.1.162:14550'
 
 #print unicode colors
 class bcolors:
@@ -51,7 +52,7 @@ if __name__ == "__main__":
 		print e
 		sys.exit(1)
 
-	pdb.set_trace()
+	#pdb.set_trace()
 	# try to "fix" the average
 	makeUpTime = 0
 	while True:
@@ -63,7 +64,8 @@ if __name__ == "__main__":
 			lat = float(drone.location.global_frame.lat)
 			lon = float(drone.location.global_frame.lon)
 			alt = float(drone.location.global_frame.alt)
-			groundcourse = float(drone.heading)
+			print drone.heading
+			groundcourse = float(drone.heading if drone.heading != None else  0)
 			heading = groundcourse
 
 			latdeg = round(lat)
@@ -73,6 +75,8 @@ if __name__ == "__main__":
 			londeg = round(lon)
 			lonmin = round((lon-londeg)*60)
 			lonsec = round(((lon-londeg)*60-lonmin)*3600)
+			now = time()
+			print(now- beforeTelem)
 
 			print "----------TIME STAMP-------------\n"
 			print "         "+str(beforeTelem)+"        \n"
@@ -82,14 +86,19 @@ if __name__ == "__main__":
 		               "Altitude: "+str(alt*3.28084)+"ft\n"+ \
 		               "Heading: "+str(heading)+"deg"+bcolors.ENDC+"\n" 
 
-
+			beforeRequest = time()
 			#forumlate json of data
-			telemetry = {'latitude':lat,'longitude':lon,'altitude_msl':alt,'uas_heading':groundcourse}
+			telemetry = Telemetry(latitude=lat,
+						 longitude=lon,
+						 altitude_msl=alt,
+						 uas_heading=groundcourse)
 
 			#post to django
 			fut= client.post_telemetry(telemetry)
 			#wait for response
 			afterServeTime,error = fut.result()
+			now = time()
+			print(now-beforeRequest)
 
 			if error:
 				print bcolors.FAIL+"Continuing but recieved an error from Django:"+bcolors.ENDC+"\n"
@@ -104,6 +113,7 @@ if __name__ == "__main__":
 				makeUpTime = 0
 			else:
 				makeUpTime = -timeToSleep
+			print(1/(afterTelem-beforeTelem+timeToSleep))
 
 
 		except IOError as e:
