@@ -5,7 +5,6 @@ requires. They include input validation, making a best-effort to ensure
 values will be accepted by the server.
 """
 
-import dateutil.parser
 import re
 import sys
 
@@ -39,13 +38,126 @@ class ClientBaseType(object):
 
     def serialize(self):
         """Serialize the current state of the object."""
-        return {k: self.__dict__[k]
-                for k in self.attrs if self.__dict__[k] is not None}
+        serial = {}
+        for attr in self.attrs:
+            data = self.__dict__[attr]
+            if isinstance(data, ClientBaseType):
+                serial[attr] = data.serialize()
+            elif isinstance(data, list):
+                serial[attr] = [d.serialize() for d in data]
+            else:
+                serial[attr] = data
+        return serial
 
     @classmethod
     def deserialize(cls, d):
         """Deserialize the state of the object."""
-        return cls(**d)
+        if isinstance(d, cls):
+            return d
+        else:
+            return cls(**d)
+
+
+class GpsPosition(ClientBaseType):
+    """GPS position consisting of a latitude and longitude.
+
+    Attributes:
+        latitude: Latitude in decimal degrees.
+        longitude: Longitude in decimal degrees.
+
+    Raises:
+        ValueError: Argument not convertable to float.
+    """
+
+    attrs = ['latitude', 'longitude']
+
+    def __init__(self, latitude, longitude):
+        self.latitude = float(latitude)
+        self.longitude = float(longitude)
+
+
+class FlyZone(ClientBaseType):
+    """Flight boundary consisting of GPS polygon and altitude range.
+
+    Attributes:
+        boundary_pts: List of Waypoint defining a polygon.
+        altitude_msl_min: Minimum altitude in feet MSL.
+        altitude_msl_max: Maximum altitude in feet MSL.
+
+    Raises:
+        ValueError: Argument not convertable to float.
+    """
+
+    attrs = ['boundary_pts', 'altitude_msl_min', 'altitude_msl_max']
+
+    def __init__(self, boundary_pts, altitude_msl_min, altitude_msl_max):
+        self.boundary_pts = [Waypoint.deserialize(bp) for bp in boundary_pts]
+        self.altitude_msl_min = float(altitude_msl_min)
+        self.altitude_msl_max = float(altitude_msl_max)
+
+
+class Waypoint(ClientBaseType):
+    """Waypoint consisting of an order, GPS position, and optional altitude.
+
+    Attributes:
+        order: An ID giving relative order in a set of waypoints.
+        latitude: Latitude in decimal degrees.
+        longitude: Longitude in decimal degrees.
+        altitude: Optional. Altitude in feet MSL.
+
+    Raises:
+        ValueError: Argument not convertable to int or float.
+    """
+
+    attrs = ['order', 'latitude', 'longitude', 'altitude_msl']
+
+    def __init__(self, order, latitude, longitude, altitude_msl=None):
+        self.order = int(order)
+        self.latitude = float(latitude)
+        self.longitude = float(longitude)
+        self.altitude_msl = None
+        if altitude_msl is not None:
+            self.altitude_msl = float(altitude_msl)
+
+
+class Mission(ClientBaseType):
+    """Mission details.
+
+    Attributes:
+        id: The unique ID of the mission.
+        active: Whether the mission is active.
+        air_drop_pos: The GpsPosition of the air drop.
+        fly_zones: A list of FlyZone boundaries the UAS must be within.
+        home_pos: The GpsPosition of the UAS launch point (tents).
+        mission_waypoints: A list of Waypoint the UAS must traverse.
+        off_axis_target_pos: The GpsPosition of the off-axis target.
+        emergent_last_known_pos: The last known GpsPosition of the emergent
+            target.
+        search_grid_points: List of Waypoint defining the search grid polygon.
+
+    Raises:
+        ValueError: Argument not convertable to int or float.
+    """
+
+    attrs = ['id', 'active', 'air_drop_pos', 'fly_zones', 'home_pos',
+             'mission_waypoints', 'off_axis_target_pos',
+             'emergent_last_known_pos', 'search_grid_points']
+
+    def __init__(self, id, active, air_drop_pos, fly_zones, home_pos,
+                 mission_waypoints, off_axis_target_pos,
+                 emergent_last_known_pos, search_grid_points):
+        self.id = int(id)
+        self.active = bool(active)
+        self.air_drop_pos = GpsPosition.deserialize(air_drop_pos)
+        self.fly_zones = [FlyZone.deserialize(fz) for fz in fly_zones]
+        self.home_pos = GpsPosition.deserialize(home_pos)
+        self.mission_waypoints = [Waypoint.deserialize(mw)
+                                  for mw in mission_waypoints]
+        self.off_axis_target_pos = GpsPosition.deserialize(off_axis_target_pos)
+        self.emergent_last_known_pos = GpsPosition.deserialize(
+            emergent_last_known_pos)
+        self.search_grid_points = [Waypoint.deserialize(sg)
+                                   for sg in search_grid_points]
 
 
 class Telemetry(ClientBaseType):
@@ -68,26 +180,6 @@ class Telemetry(ClientBaseType):
         self.longitude = float(longitude)
         self.altitude_msl = float(altitude_msl)
         self.uas_heading = float(uas_heading)
-
-
-class ServerInfo(ClientBaseType):
-    """Server information to be displayed to judges.
-
-    Attributes:
-        message: Custom message from the server
-        message_timestamp (datetime.datetime): Message timestamp
-        server_time (datetime.datetime): Current server time
-
-    Raises:
-        TypeError, ValueError: Message or server timestamp could not be parsed.
-    """
-
-    attrs = ['message', 'message_timestamp', 'server_time']
-
-    def __init__(self, message, message_timestamp, server_time):
-        self.message = message
-        self.message_timestamp = dateutil.parser.parse(message_timestamp)
-        self.server_time = dateutil.parser.parse(server_time)
 
 
 class StationaryObstacle(ClientBaseType):

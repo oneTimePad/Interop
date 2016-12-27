@@ -1,13 +1,14 @@
 import sys
 
-from client import Client
+from interop import Client
+from interop import Telemetry
 from time import sleep, time
 from dronekit import connect
 import argparse
 import pdb
 
 # target upload rate in Hz
-TARGET_RATE = 13
+TARGET_RATE = 10
 FEET_PER_METER = 3.28084
 MAV_SERVER = '127.0.0.1:14550'
 
@@ -51,46 +52,34 @@ if __name__ == "__main__":
 		print e
 		sys.exit(1)
 
-	pdb.set_trace()
+	#pdb.set_trace()
 	# try to "fix" the average
 	makeUpTime = 0
 	while True:
 		try:
-
 			beforeTelem = time()
-
 			#get data from maxproxy (Dronekit)
-			lat = float(drone.location.global_frame.lat)
-			lon = float(drone.location.global_frame.lon)
-			alt = float(drone.location.global_frame.alt)
-			groundcourse = float(drone.heading)
-			heading = groundcourse
-
-			latdeg = round(lat)
-			latmin = round((lat-latdeg)*60)
-			latsec = round(((lat-latdeg)*60-latmin)*3600)
-
-			londeg = round(lon)
-			lonmin = round((lon-londeg)*60)
-			lonsec = round(((lon-londeg)*60-lonmin)*3600)
-
-			print "----------TIME STAMP-------------\n"
-			print "         "+str(beforeTelem)+"        \n"
-			print bcolors.OKBLUE+"Telemtry Data:\n" \
-			"Latitude: "+ str(latdeg)+"deg "+str(latmin)+"min "+str(latsec)+"sec\n"+ \
-		               "Longitude: "+str(londeg)+"deg "+str(lonmin)+"min "+str(lonsec)+"sec\n"+ \
-		               "Altitude: "+str(alt*3.28084)+"ft\n"+ \
-		               "Heading: "+str(heading)+"deg"+bcolors.ENDC+"\n" 
-
-
+			#lat = float(drone.location.global_frame.lat)
+			#lon = float(drone.location.global_frame.lon)
+			#alt = float(drone.location.global_frame.alt)
+			#print drone.heading
+			#groundcourse = float(drone.heading if drone.heading != None else  0)
+			#heading = groundcourse
+            #lat = 90
+            #lon = 90
+            #alt = 90
+            #heading = 90
 			#forumlate json of data
-			telemetry = {'latitude':lat,'longitude':lon,'altitude_msl':alt,'uas_heading':groundcourse}
+			telemetry = Telemetry(latitude=90,
+						 longitude=90,
+						 altitude_msl=90,
+						 uas_heading=90)
 
 			#post to django
 			fut= client.post_telemetry(telemetry)
 			#wait for response
 			afterServeTime,error = fut.result()
-
+            #print afterServeTime
 			if error:
 				print bcolors.FAIL+"Continuing but recieved an error from Django:"+bcolors.ENDC+"\n"
 				print error
@@ -104,6 +93,7 @@ if __name__ == "__main__":
 				makeUpTime = 0
 			else:
 				makeUpTime = -timeToSleep
+			print(1/(afterTelem-beforeTelem+timeToSleep))
 
 
 		except IOError as e:

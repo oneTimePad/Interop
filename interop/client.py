@@ -4,11 +4,11 @@ import json
 import base64
 import pdb
 import sys
-from time import time
+import time
+from types import Mission,StationaryObstacle,MovingObstacle
 workers = 5
 
 class _Client(object):
-
     def __init__(self,url,username,password,timeout=5):
         self.url = url
         self.timeout = timeout
@@ -35,7 +35,7 @@ class _Client(object):
             raise Exception(resp.status_code)
 
     def refresh(self):
-        if long(self.exp)-long(time())<=3000:
+        if long(self.exp)-long(time.time())<=3000:
             resp = requests.post(self.url+'/interop/refresh',headers={'Content-Type':'application/json; charset=UTF-8'},data= json.dumps({'token':self.token}))
             if resp.status_code == 400:
                 self.login()
@@ -44,13 +44,26 @@ class _Client(object):
 
     def post_telemetry(self,data):
         #self.refresh()
-        resp = requests.post(self.url+'/interop/postTelemetry',data=data, headers={'Authorization':'JWT '+self.token['token']})
+        resp =requests.post(self.url+'/interop/postTelemetry',data=data.serialize(), headers={'Authorization':'JWT '+self.token['token']})
         return (resp.json()['time'],resp.json()['error'])
         #respond
 
-	def get_obstacles(self):
-		pass
+    def get_mission(self):
+        """
+        fetches missions and returns them as a list in mission object form
+        """
+        resp = requests.post(self.url+'/interop/getMission',headers={'Authorization':'JWT '+self.token['token']})
+        return ([Mission(**resp.json()[key]) for key in resp.json().keys() if key !='error'],resp.json()['error'])
+    def get_obstacles(self):
+        """
+        fetches moving and stationary obstacles and returns as
+        (list(moving obstacles), list(stationry obstacles), error)
+        obstacles are in object format
+        """
 
+        resp = requests.post(self.url+'/interop/getObstacles',headers={'Authorization':'JWT '+self.token['token']})
+
+        return ([MovingObstacle(**resp.json()['moving'][key]) for key in resp.json()['moving'].keys()],[StationaryObstacle(**resp.json()['stationary'][key]) for key in resp.json()['stationary'].keys()],resp.json()['error'])
 class Client(object):
     def __init__(self,url,username,password):
 
@@ -59,3 +72,9 @@ class Client(object):
 
     def post_telemetry(self,data):
         return self.executor.submit(self.client.post_telemetry,data)
+
+    def get_mission(self):
+        return self.executor.submit(self.client.get_mission)
+
+    def get_obstacles(self):
+        return self.executor.submit(self.client.get_obstacles)

@@ -1,0 +1,7 @@
+dronekit==2.9.0
+futures==3.0.5
+monotonic==1.2
+pymavlink==2.0.6
+python-dateutil==2.6.0
+requests==2.12.4
+six==1.10.0
