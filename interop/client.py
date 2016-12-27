@@ -5,6 +5,7 @@ import base64
 import pdb
 import sys
 import time
+from types import Mission
 workers = 5
 
 class _Client(object):
@@ -48,6 +49,13 @@ class _Client(object):
         return (resp.json()['time'],resp.json()['error'])
         #respond
 
+    def get_mission(self):
+        """
+        fetches missions and returns them as a list in mission object form
+        """
+        resp = requests.post(self.url+'/interop/getMission',headers={'Authorization':'JWT '+self.token['token']})
+        return ([Mission(**resp.json()[key]) for key in resp.json().keys() if key !='error'],resp.json()['error'])
+
 	def get_obstacles(self):
 		pass
 
@@ -59,3 +67,6 @@ class Client(object):
 
     def post_telemetry(self,data):
         return self.executor.submit(self.client.post_telemetry,data)
+
+    def get_mission(self):
+        return self.executor.submit(self.client.get_mission)
