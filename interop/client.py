@@ -5,11 +5,10 @@ import base64
 import pdb
 import sys
 import time
-from types import Mission
+from types import Mission,StationaryObstacle,MovingObstacle
 workers = 5
 
 class _Client(object):
-
     def __init__(self,url,username,password,timeout=5):
         self.url = url
         self.timeout = timeout
@@ -55,10 +54,16 @@ class _Client(object):
         """
         resp = requests.post(self.url+'/interop/getMission',headers={'Authorization':'JWT '+self.token['token']})
         return ([Mission(**resp.json()[key]) for key in resp.json().keys() if key !='error'],resp.json()['error'])
+    def get_obstacles(self):
+        """
+        fetches moving and stationary obstacles and returns as
+        (list(moving obstacles), list(stationry obstacles), error)
+        obstacles are in object format
+        """
 
-	def get_obstacles(self):
-		pass
+        resp = requests.post(self.url+'/interop/getObstacles',headers={'Authorization':'JWT '+self.token['token']})
 
+        return ([MovingObstacle(**resp.json()['moving'][key]) for key in resp.json()['moving'].keys()],[StationaryObstacle(**resp.json()['stationary'][key]) for key in resp.json()['stationary'].keys()],resp.json()['error'])
 class Client(object):
     def __init__(self,url,username,password):
 
@@ -70,3 +75,6 @@ class Client(object):
 
     def get_mission(self):
         return self.executor.submit(self.client.get_mission)
+
+    def get_obstacles(self):
+        return self.executor.submit(self.client.get_obstacles)

@@ -23,6 +23,8 @@ while True:
 
 
 missions,error = client.get_mission().result()
+if error != None:
+    raise Exception(error)
 print missions[0]
 
 """
