@@ -5,10 +5,8 @@ interoperability client programs
 
 
 ### Contains:
+	- libinterop (library for utilizing interop clients)
 	- Telemetry Interoperability client
-	- Server info/ SDA obstacles Interoperability client
+	- SDA obstacles Interoperability client(GO TO SDA REPO)
 	- Load Mission Interoperability client
-###Client Program checklist:
 
-- [ ] add SDA fetch obstacles
-- [ ] add fetch mission (waypoints, search path ...)

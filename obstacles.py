@@ -1,31 +1,38 @@
 """
 main program for SDA and interop related to SDA
 this should be the first program started for sda
-
+PLEASE refer to libinterop/types.py for information on the auvsi provided
+objects
+objects that used are:
+	MovingObstacle
+	StationaryObstacle
 """
 
 from libinterop import ObstacleInterop
-import time
+
 """
 These configurations are defaults. Please edit proxy_info and poll_info and
 DEBUG to meet your needs
 """
+#prox_info is the information for the ground station
 proxy_info ={
-	"host": "192.168.1.160",
+	"host": "192.168.1.171",
 	"port"  : "8000",
 	"username": "telemuser",
 	"password": "ruautonomous"
 
 }
 
-
+#poll_sec is the time between requests for obstacles
+#print_sec is the time between prints for debugging (i.e. not used if debugging
+#is off
 poll_info = {
 	"poll_sec" : 0.1,
 	"print_sec": 10
 }
 
 
-DEBUG = True # set to false to disable debug info
+DEBUG = False # set to true to enable debug info
 def handle_response(moving,stationary,error):
 	"""
 	moving:= list of moving obstacles in object format
@@ -80,6 +87,8 @@ obstacles_client.start()
 #TODO: add synchronus work here (everything that happens while waiting for
 #obstacle position updates (i.e. rest of the SDA code [function, routines, etc]
 #EXAMPLE:
+#time imported for example only
+import time
 while True:
 	print("Do some SDA stuff")
 	time.sleep(2)
