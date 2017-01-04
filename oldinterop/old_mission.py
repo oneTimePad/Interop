@@ -1,4 +1,4 @@
-from interop import Client
+from libinterop import Client
 import binascii
 import argparse
 
