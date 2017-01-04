@@ -64,6 +64,7 @@ class _Client(object):
         resp = requests.post(self.url+'/interop/getObstacles',headers={'Authorization':'JWT '+self.token['token']})
 
         return ([MovingObstacle(**resp.json()['moving'][key]) for key in resp.json()['moving'].keys()],[StationaryObstacle(**resp.json()['stationary'][key]) for key in resp.json()['stationary'].keys()],resp.json()['error'])
+
 class Client(object):
     def __init__(self,url,username,password):
 

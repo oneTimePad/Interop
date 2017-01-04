@@ -1,7 +1,7 @@
 import sys
 #sys.path.append(".")
-from interop import Client
-from interop import Telemetry
+from libinterop import Client
+from libinterop import Telemetry
 import time
 import dronekit
 import argparse
