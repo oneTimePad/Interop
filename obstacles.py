@@ -9,7 +9,7 @@ objects that used are:
 """
 
 from libinterop import ObstacleInterop
-from sda import handle_response,main_routine
+from sda import async_routine,sync_routine
 
 """
 These configurations are defaults. Please edit proxy_info and poll_info and
