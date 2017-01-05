@@ -3,10 +3,10 @@ Interoperbility component that uploads telemetry
 """
 
 from libinterop import TelemetryInterop
-
+import threading
 
 proxy_info ={
-	"host": "192.168.1.160",
+	"host": "192.168.1.171",
 	"port"  : "8000",
 	"username": "telemuser",
 	"password": "ruautonomous"
@@ -25,10 +25,10 @@ mav_info = {
 }
 
 
-telem_client = TelemtryInterop(
+telem_client = TelemetryInterop(
 	proxy_info,
 	poll_info,
 	mav_info)
 print("STARTING Telemetry Interop Client")
-telem_client.start(THREADING_ENABLED=False)
+telem_client.start(False)
 

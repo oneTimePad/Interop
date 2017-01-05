@@ -65,7 +65,7 @@ class _Client(object):
 
         return ([MovingObstacle(**resp.json()['moving'][key]) for key in resp.json()['moving'].keys()],[StationaryObstacle(**resp.json()['stationary'][key]) for key in resp.json()['stationary'].keys()],resp.json()['error'])
 
-class Client(object):
+class InteropClient(object):
     def __init__(self,url,username,password):
 
         self.client=_Client(url,username,password)
