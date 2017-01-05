@@ -9,6 +9,7 @@ objects that used are:
 """
 
 from libinterop import ObstacleInterop
+from sda import handle_response,main_routine
 
 """
 These configurations are defaults. Please edit proxy_info and poll_info and
@@ -33,45 +34,7 @@ poll_info = {
 
 
 DEBUG = False # set to true to enable debug info
-def handle_response(moving,stationary,error):
-	"""
-	moving:= list of moving obstacles in object format
-	stationary:= list of stationary obstacles in object format
-	NOTE: see libinterop/types.py for the structure of the object format
-	moving = [MovingObstacle(...),MovingObstacle(...),...]
-	same for stationary
-	error:=an error is returned from the server when not equal to None
 
-	NOTE OF Caution: be careful when editing global variables here,
-	execution of this function is asynchronous of everything outside it.
-	This means that is can happen at anytime. Thus you need to lock any global
-	data using the following:
-
-		import threading
-		lock = threading.Lock()
-
-		...
-		# area where global variable is edited
-		def handle_response(...):
-			no lock
-			with lock:
-				do stuff with global variable
-			no lock
-		#stuff outside of handle_response where global variable is edited
-		no lock
-		with lock:
-			do stuff with same global variable
-		no lock
-	"""
-
-	if error:
-		print("error: %s" %(str(error)))
-	"""
-		all the work that gets done when receiving obstacle updates goes
-		hanle_response
-	"""
-	#Example
-	print("updating obstacle status ...")
 
 obstacles_client = ObstacleInterop(
 	proxy_info,
@@ -82,15 +45,5 @@ obstacles_client = ObstacleInterop(
 
 obstacles_client.start()
 
-#EVERYTHING ABOVE HERE IS REQUIRED
-
-#TODO: add synchronus work here (everything that happens while waiting for
-#obstacle position updates (i.e. rest of the SDA code [function, routines, etc]
-#EXAMPLE:
-#time imported for example only
-import time
-while True:
-	print("Do some SDA stuff")
-	time.sleep(2)
-
+main_routine()
 

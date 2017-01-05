@@ -7,6 +7,6 @@ interoperability client programs
 ### Contains:
 	- libinterop (library for utilizing interop clients)
 	- Telemetry Interoperability client
-	- SDA obstacles Interoperability client(GO TO SDA REPO)
+	- SDA obstacles Interoperability client
 	- Load Mission Interoperability client
 
