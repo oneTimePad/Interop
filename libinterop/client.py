@@ -68,8 +68,15 @@ class _Client(object):
 class InteropClient(object):
     def __init__(self,url,username,password):
 
-        self.client=_Client(url,username,password)
+
         self.executor = ThreadPoolExecutor(max_workers = workers)
+        while True:
+          try:
+                self.client=_Client(url,username,password)
+                break
+          except(TypeError,binascii.Error):
+                continue #continue to attempt upload on token decode failure
+
 
     def post_telemetry(self,data):
         return self.executor.submit(self.client.post_telemetry,data)

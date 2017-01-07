@@ -24,12 +24,7 @@ class HandlerInteropClient(InteropClient):
 		self.PRINT_SEC = poll_info["print_sec"] if ("print_sec" in poll_info)else 0
 
 
-		while True:
-			try:
-				super(HandlerInteropClient,self).__init__("http://"+proxy_info["host"]+":"+proxy_info["port"],proxy_info["username"],proxy_info["password"])
-				break
-			except(TypeError,binascii.Error):
-				continue #continue to attempt upload on token decode failure
+		super(HandlerInteropClient,self).__init__("http://"+proxy_info["host"]+":"+proxy_info["port"],proxy_info["username"],proxy_info["password"])
 
 	def handler_contact_callback(self,future):
 
