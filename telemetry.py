@@ -6,7 +6,7 @@ from libinterop import TelemetryInterop
 import threading
 
 proxy_info ={
-	"host": "192.168.1.171",
+	"host": "192.168.123.200",
 	"port"  : "8000",
 	"username": "telemuser",
 	"password": "ruautonomous"
@@ -20,7 +20,7 @@ poll_info = {
 }
 
 mav_info = {
-	"host": "192.168.1.162",
+	"host": "192.168.123.205",
 	"port": "14550"
 }
 

@@ -14,7 +14,7 @@ change this configuration of the proxy info to meet your needs
 proxy_info is the information for our groundstation
 """
 proxy_info ={
-	"host": "192.168.1.171",
+	"host": "192.168.123.200",
 	"port"  : "8000",
 	"username": "telemuser",
 	"password": "ruautonomous"
@@ -30,7 +30,7 @@ missions,error = mission_client.start()
 if error !=None:
 	raise Exception(error)
 
-print(missions[0])
+print(missions)
 
 #TODO: Load missions into mavproxy/dronekit/missionplanner
 
