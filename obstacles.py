@@ -10,6 +10,12 @@ objects that used are:
 
 from libinterop import ObstacleInterop
 from sda import async_routine,sync_routine
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("server",help="ip:port pair for django")
+parser.add_argument("username",help="username for django")
+parser.add_argument("password", help="password for django")
 
 """
 These configurations are defaults. Please edit proxy_info and poll_info and
@@ -17,10 +23,10 @@ DEBUG to meet your needs
 """
 #prox_info is the information for the ground station
 proxy_info ={
-	"host": "192.168.1.171",
-	"port"  : "8000",
-	"username": "telemuser",
-	"password": "ruautonomous"
+	"host": args.server.split(':')[0],
+	"port"  : args.server.split(':')[1],
+	"username":args.username,
+	"password": args.password
 
 }
 
@@ -46,4 +52,3 @@ obstacles_client = ObstacleInterop(
 obstacles_client.start()
 
 main_routine()
-
