@@ -1,4 +1,4 @@
-from baseclient import AsyncClient
+from baseclients import AsyncClient
 from types import Telemetry
 import binascii
 import time
@@ -42,7 +42,7 @@ class InteropClient(AsyncClient):
 		self.PRINT_SEC = poll_info["print_sec"] if ("print_sec" in poll_info)else 0
 
 
-		super(HandlerInteropClient,self).__init__("http://"+proxy_info["host"]+":"+proxy_info["port"],proxy_info["username"],proxy_info["password"])
+		super(InteropClient,self).__init__("http://"+proxy_info["host"]+":"+proxy_info["port"],proxy_info["username"],proxy_info["password"])
 
 	def handler_contact_callback(self,future):
 		"""

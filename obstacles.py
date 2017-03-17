@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("server",help="ip:port pair for django")
 parser.add_argument("username",help="username for django")
 parser.add_argument("password", help="password for django")
-
+args = parser.parse_args()
 """
 These configurations are defaults. Please edit proxy_info and poll_info and
 DEBUG to meet your needs
@@ -45,10 +45,10 @@ DEBUG = False # set to true to enable debug info
 obstacles_client = ObstacleInterop(
 	proxy_info,
 	poll_info,
-	handle_response,
+	async_routine,
 	status_debug=DEBUG)
 
 
 obstacles_client.start()
 
-main_routine()
+sync_routine()

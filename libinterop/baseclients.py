@@ -2,6 +2,7 @@ from concurrent.futures import ThreadPoolExecutor
 import requests
 import json
 import base64
+import binascii
 import pdb
 import sys
 import time
@@ -62,6 +63,10 @@ class _Client(object):
 			returns := tuple(time of response,error)
 		"""
 		resp =requests.post(self.url+'/interop/postTelemetry',data=data.serialize(), headers={'Authorization':'JWT '+self.token['token']})
+		if not resp.ok:
+			return (None,"Received %d\n" % resp.status_code)
+		if resp.json()['error'] is not None:
+			return (None,resp.json()['error'])
 		return (resp.json()['time'],resp.json()['error'])
 
 	def get_mission(self):
@@ -70,6 +75,10 @@ class _Client(object):
 			returns := list( Misssion_obj , ... )
 		"""
 		resp = requests.post(self.url+'/interop/getMission',headers={'Authorization':'JWT '+self.token['token']})
+		if not resp.ok:
+			return (None,"Received %d\n" % resp.status_code)
+		if resp.json()['error'] is not None:
+			return (None,resp.json()['error'])
 		return ([Mission(**resp.json()[key]) for key in resp.json().keys() if key !='error'],resp.json()['error'])
 	def get_obstacles(self):
 		"""
@@ -78,7 +87,10 @@ class _Client(object):
 		"""
 
 		resp = requests.post(self.url+'/interop/getObstacles',headers={'Authorization':'JWT '+self.token['token']})
-
+		if not resp.ok:
+			return (None,None,"Received %d\n" % resp.status_code)
+		if resp.json()['error'] is not None:
+			return (None,None,resp.json()['error'])
 		return ([MovingObstacle(**resp.json()['moving'][key]) for key in resp.json()['moving'].keys()],[StationaryObstacle(**resp.json()['stationary'][key]) for key in resp.json()['stationary'].keys()],resp.json()['error'])
 
 class AsyncClient(object):
