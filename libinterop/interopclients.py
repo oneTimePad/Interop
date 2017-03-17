@@ -144,8 +144,9 @@ class TelemetryInterop(InteropClient):
 		# fetch the current telemetry from dronekit (lat,lon,altitude MSL, heading)
 		telemetry = Telemetry(latitude=float(drone.location.global_frame.lat),
 					   longitude=float(drone.location.global_frame.lon),
-					   altitude_msl=float(drone.location.global_frame.alt),
-					   uas_heading = 0)
+					   altitude_msl=float(drone.location.global_frame.alt*.3048),
+					   uas_heading = drone.heading)
+
 		#only send if telemtry has changed
 		if telemetry != self.last_telemetry:
 			return self.post_telemetry(telemetry)
