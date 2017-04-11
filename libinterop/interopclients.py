@@ -5,7 +5,9 @@ import time
 import threading
 import dronekit
 import datetime
-
+import logging
+import sys
+from proxy_mavlink import *
 
 """
 	Clients that implement the actual functionality specific to each interop task
@@ -54,7 +56,7 @@ class InteropClient(AsyncClient):
 		else:
 			if self.status_debug:
 				print("DEBUG: Request result %s" %(str(future.result())))
-			
+
 				with self.status_lock:
 					self.sent_since_print+=1
 			# if the client has a registered callback passed in the constructor, call it now
@@ -63,13 +65,13 @@ class InteropClient(AsyncClient):
 					self.future_callback(*future.result())
 				except Exception as e:
 					print("WARNING: Registered callback Failed with %s" % (str(e)))
-		
+
 	def _make_request(self):
 		"""
 			the actual request method that must be overriden by subclasses
 		"""
 		raise NotImplementedError("_make_request must be overridden")
-	
+
 	def start(self,THREADING_ENABLED=True):
 		"""
 			starts up the requesting and multithreads if needed
@@ -124,15 +126,16 @@ class TelemetryInterop(InteropClient):
 			raise Exception("TelemtryInterop required mav_info=dict('host','port') to contact mavproxy")
 		#connects to MAVProxy via Dronekit over udp
 		self.mav_endpoint = mav_info["host"] +":"+mav_info["port"]
-		
 		try:
 			#make the dronekit connection
-			self.drone = dronekit.connect(self.mav_endpoint,wait_ready=True)
+			self.drone = mavutil.mavlink_connection("udp:"+self.mav_endpoint, autoreconnect=True)
 		except Exception as e:
-			print("TelemetryInterop failed to setup mav connection, Failed with %s" %(str(e)))
-			return
+			raise Exception("TelemetryInterop failed to setup mav connection, Failed with %s" %(str(e)))
+		if not self.drone:
+			raise Exception("Failed to connect via %s\n" %str(self.mav_endpoint))
 		#create an initial telemetry
 		self.last_telemetry = Telemetry(0,0,0,0)
+		self.logger = logging.getLogger(__name__)
 
 		super(TelemetryInterop,self).__init__(proxy_info,poll_info,status_debug=status_debug)
 
@@ -141,14 +144,23 @@ class TelemetryInterop(InteropClient):
 			post the current telemetry
 		"""
 		drone = self.drone
+		# Get packet
+		msg = drone.recv_match(type='GLOBAL_POSITION_INT',
+								blocking=True,
+								timeout=10.0)
+		if msg is None:
+			self.logger.critical(
+			'Did not receive MAVLink packet for over 10 seconds.')
+			sys.exit(-1)
 		# fetch the current telemetry from dronekit (lat,lon,altitude MSL, heading)
-		telemetry = Telemetry(latitude=float(drone.location.global_frame.lat),
-					   longitude=float(drone.location.global_frame.lon),
-					   altitude_msl=float(drone.location.global_frame.alt*.3048),
-					   uas_heading = drone.heading)
+		telemetry = Telemetry(latitude=mavlink_latlon(msg.lat),
+							longitude=mavlink_latlon(msg.lon),
+							  altitude_msl=mavlink_alt(msg.alt),
+							  uas_heading=mavlink_heading(msg.hdg))
 
 		#only send if telemtry has changed
 		if telemetry != self.last_telemetry:
+			print("telemtry:"+str(telemtry))
 			return self.post_telemetry(telemetry)
 
 
@@ -173,5 +185,3 @@ class MissionInterop(AsyncClient):
 
 	def start(self):
 		return self.get_mission().result()
-
-
