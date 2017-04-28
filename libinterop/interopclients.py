@@ -3,7 +3,6 @@ from types import Telemetry
 import binascii
 import time
 import threading
-import dronekit
 import datetime
 import logging
 import sys
@@ -160,7 +159,7 @@ class TelemetryInterop(InteropClient):
 
 		#only send if telemtry has changed
 		if telemetry != self.last_telemetry:
-			print("telemtry:"+str(telemtry))
+			print("telemtry:"+str(telemetry))
 			return self.post_telemetry(telemetry)
 
 
