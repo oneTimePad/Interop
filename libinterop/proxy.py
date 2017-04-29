@@ -6,7 +6,6 @@ import threading
 import datetime
 import logging
 import sys
-import dronekit
 from proxy_mavlink import *
 
 """
@@ -128,10 +127,9 @@ class TelemetryInterop(InteropClient):
 		self.mav_endpoint = mav_info["host"] +":"+mav_info["port"]
 		try:
 			#make the dronekit connection
-			self.drone = dronekit.connect(self.mav_endpoint,wait_ready=True)
+			self.drone = mavutil.mavlink_connection("udp:"+self.mav_endpoint, autoreconnect=True)
 		except Exception as e:
-			print("TelemetryInterop failed to setup mav connection, Failed with %s" %(str(e)))
-			return		
+			raise Exception("TelemetryInterop failed to setup mav connection, Failed with %s" %(str(e)))
 		if not self.drone:
 			raise Exception("Failed to connect via %s\n" %str(self.mav_endpoint))
 		#create an initial telemetry
@@ -145,17 +143,24 @@ class TelemetryInterop(InteropClient):
 			post the current telemetry
 		"""
 		drone = self.drone
-				# fetch the current telemetry from dronekit (lat,lon,altitude MSL, heading)
-		telemetry = Telemetry(latitude=float(drone.location.global_frame.lat),
-					   longitude=float(drone.location.global_frame.lon),
-					   altitude_msl=float(drone.location.global_frame.alt*3.28084
-),
-					   uas_heading = drone.heading)
+		# Get packet
+		msg = drone.recv_match(type='GLOBAL_POSITION_INT',
+								blocking=True,
+								timeout=10.0)
+		if msg is None:
+			self.logger.critical(
+			'Did not receive MAVLink packet for over 10 seconds.')
+			sys.exit(-1)
+		# fetch the current telemetry from dronekit (lat,lon,altitude MSL, heading)
+		telemetry = Telemetry(latitude=mavlink_latlon(msg.lat),
+							longitude=mavlink_latlon(msg.lon),
+							  altitude_msl=mavlink_alt(msg.alt),
+							  uas_heading=mavlink_heading(msg.hdg))
+
 		#only send if telemtry has changed
 		if telemetry != self.last_telemetry:
 			#print("telemtry:"+str(telemetry))
 			return self.post_telemetry(telemetry)
-
 		
 
 
